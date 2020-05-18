@@ -9,5 +9,6 @@ router = DefaultRouter()
 router.register('user', views.UserProfileViewSet, base_name='user')
 
 urlpatterns = [
+    path('user/login/', views.UserLoginView.as_view()),
     path('', include(router.urls))
 ]
