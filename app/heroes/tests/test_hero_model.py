@@ -22,6 +22,12 @@ def create_sample_hero(**params):
 
     return models.Hero.objects.create(**hero)
 
+def marvel_hero_url(hero_id):
+    return reverse('hero:marvel-detail', args=[hero_id])
+
+def dc_hero_url(hero_id):
+    return reverse('hero:dc-detail', args=[hero_id])
+
 class PublicTests(TestCase):
     """Tests unauthenticated access"""
 
@@ -80,3 +86,76 @@ class PublicTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(serializer.data, res.data)
         self.assertNotIn(hulk_serialized.data, res.data)
+
+
+class AuthenticatedTests(TestCase):
+    """Tests authenticated requests"""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email = 'heroes@fan.com',
+            password = 'nostalgia',
+            name = 'Brian'
+        )
+        self.client.force_authenticate(self.user)
+
+    def test_retrieve_dc_hero_from_marvel(self):
+        """Tests retrieving dc hero from marvel url"""
+        flash = create_sample_hero(
+            alias = 'Flash',
+            alter_ego = 'Barry Allen',
+            universe = 'DC'
+        )
+        res = self.client.get(marvel_hero_url(flash.id))
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_retrieve_marvel_hero_from_dc(self):
+        """Tests retrieving marvel hero from dc url"""
+        hulk = create_sample_hero()
+        res = self.client.get(dc_hero_url(hulk.id))
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_retrieve_not_owned_hero_marvel(self):
+        """Tests retrieving a hero that you dont own"""
+        hulk = create_sample_hero()
+
+        res = self.client.get(marvel_hero_url(hulk.id))
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_retrieve_owned_hero_marvel(self):
+        """Tests retrieving an owned hero"""
+        hulk = create_sample_hero()
+        self.user.superheroes.add(hulk)
+
+        res = self.client.get(marvel_hero_url(hulk.id))
+        serializer = HeroSerializer(hulk)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(serializer.data, res.data)
+
+    def test_retrieve_not_owned_hero_dc(self):
+        """Tests retrieving a hero that you dont own"""
+        flash = create_sample_hero(
+            alias = 'Flash',
+            alter_ego = 'Barry Allen',
+            universe = 'DC'
+        )
+
+        res = self.client.get(dc_hero_url(flash.id))
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_retrieve_owned_hero_dc(self):
+        """Tests retrieving an owned hero"""
+        flash = create_sample_hero(
+            alias = 'Flash',
+            alter_ego = 'Barry Allen',
+            universe = 'DC'
+        )
+        self.user.superheroes.add(flash)
+
+        res = self.client.get(dc_hero_url(flash.id))
+        serializer = HeroSerializer(flash)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(serializer.data, res.data)
