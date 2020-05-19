@@ -15,3 +15,7 @@ class HeroViewSet(viewsets.ModelViewSet):
 class MarvelViewSet(HeroViewSet):
     """Viewset for Marvel heroes"""
     queryset = Hero.objects.filter(universe='Marvel')
+
+class DCViewSet(HeroViewSet):
+    """Viewset for Marvel heroes"""
+    queryset = Hero.objects.filter(universe='DC')

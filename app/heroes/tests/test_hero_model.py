@@ -9,6 +9,7 @@ from core import models
 
 HEROES_URL = reverse('hero:hero-list')
 MARVEL_URL = reverse('hero:marvel-list')
+DC_URL = reverse('hero:dc-list')
 
 def create_sample_hero(**params):
     """Creates a sample hero"""
@@ -43,7 +44,7 @@ class PublicTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_return_marvel_only(self):
-        """Returns Marvel heroes only"""
+        """Tests returning Marvel heroes only"""
 
         hulk = create_sample_hero()
         arrow = create_sample_hero(
@@ -60,3 +61,22 @@ class PublicTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(serializer.data, res.data)
         self.assertNotIn(serializer2.data, res.data)
+
+    def test_return_dc_only(self):
+        """Tests returning DC heroes only"""
+        diana = create_sample_hero(
+            alias = 'Wonder Woman',
+            alter_ego = 'Diana',
+            universe = 'DC'
+        )
+
+        hulk = create_sample_hero()
+
+        res = self.client.get(DC_URL)
+
+        dc_heroes = models.Hero.objects.filter(universe='DC')
+        serializer = HeroSerializer(dc_heroes, many=True)
+        hulk_serialized = HeroSerializer(hulk)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(serializer.data, res.data)
+        self.assertNotIn(hulk_serialized.data, res.data)
