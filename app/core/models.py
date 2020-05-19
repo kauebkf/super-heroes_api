@@ -24,6 +24,11 @@ class UserManager(BaseUserManager):
 
         return user
 
+class Hero(models.Model):
+    """Hero model"""
+    alias = models.CharField(max_length=255, unique=True)
+    alter_ego = models.CharField(max_length=255, unique=True)
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     """custom user model with email field instead of password"""
@@ -32,6 +37,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+    superheroes = models.ManyToManyField(Hero)
 
     objects = UserManager()
 

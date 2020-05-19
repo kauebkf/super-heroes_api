@@ -3,17 +3,23 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework import status
 from django.urls import reverse
+from core.serializers import UserSerializer
 
 
 USERS_URL = reverse('user:user-list')
+
 
 def user_profile_url(user_id):
     """Generates url for user profile"""
     return reverse('user:user-detail', args=[user_id])
 
 
-class UserTests(TestCase):
-    """Tests implementing a custom user model"""
+class PublicTests(TestCase):
+    """Unauthenticated tests"""
+
+    def setUp(self):
+
+        self.client = APIClient()
 
     def test_create_user(self):
         """Tests creating an user and saving fields"""
@@ -59,6 +65,20 @@ class AuthenticatedUserTests(TestCase):
         """Testing listing users on users page"""
         res = self.client.get(USERS_URL)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_retrieve_another_user_profile(self):
+        """Tests retrieving user profiles other than the authenticated user"""
+        user2 = get_user_model().objects.create_user(
+            email = 'michael@jordan.com',
+            password = 'basketball',
+            name = 'Michael',
+        )
+
+        res = self.client.get(user_profile_url(user2.id))
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        serializer = UserSerializer(user2)
+        self.assertEqual(res.data, serializer.data)
+
 
     def test_modify_own_profile(self):
         """Tests modifying the user own profile"""
