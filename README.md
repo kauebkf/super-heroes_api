@@ -1,1 +1,1 @@
-# recipe_api
+# Super Heroes API
