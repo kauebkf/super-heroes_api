@@ -7,6 +7,7 @@ app_name = 'hero'
 
 router = DefaultRouter()
 router.register('hero', views.HeroViewSet, base_name='hero')
+router.register('marvel', views.MarvelViewSet, base_name='marvel')
 
 urlpatterns = [
     path('', include(router.urls))

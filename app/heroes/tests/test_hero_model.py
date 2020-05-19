@@ -4,9 +4,22 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from django.urls import reverse
 from heroes.serializers import HeroSerializer
+from core import models
 
 
 HEROES_URL = reverse('hero:hero-list')
+MARVEL_URL = reverse('hero:marvel-list')
+
+def create_sample_hero(**params):
+    """Creates a sample hero"""
+    hero = {
+        'alias': 'Hulk',
+        'alter_ego': 'Bruce Banne',
+        'universe': 'Marvel',
+    }
+    hero.update(params)
+
+    return models.Hero.objects.create(**hero)
 
 class PublicTests(TestCase):
     """Tests unauthenticated access"""
@@ -19,3 +32,31 @@ class PublicTests(TestCase):
         res = self.client.get(HEROES_URL)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_create_hero_not_allowed(self):
+        payload = {
+            'alias': 'Batman',
+            'alter_ego': 'Bruce Wayne'
+        }
+        res = self.client.post(HEROES_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_return_marvel_only(self):
+        """Returns Marvel heroes only"""
+
+        hulk = create_sample_hero()
+        arrow = create_sample_hero(
+            alias = 'Arrow',
+            alter_ego = 'Oliver Queen',
+            universe = 'DC'
+        )
+
+        res = self.client.get(MARVEL_URL)
+
+        marvel_heroes = models.Hero.objects.filter(universe='Marvel')
+        serializer = HeroSerializer(marvel_heroes, many=True)
+        serializer2 = HeroSerializer(arrow)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(serializer.data, res.data)
+        self.assertNotIn(serializer2.data, res.data)

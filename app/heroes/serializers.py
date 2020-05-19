@@ -8,4 +8,4 @@ class HeroSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = models.Hero
-        fields = ('id', 'alias', 'alter_ego')
+        fields = ('id', 'alias', 'alter_ego', 'universe')

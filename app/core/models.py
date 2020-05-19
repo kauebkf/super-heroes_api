@@ -28,6 +28,11 @@ class Hero(models.Model):
     """Hero model"""
     alias = models.CharField(max_length=255, unique=True)
     alter_ego = models.CharField(max_length=255, unique=True)
+    universe = models.CharField(max_length=255)
+
+    def __str__(self):
+
+        return f'{self.id}. {self.alias}'
 
 
 class User(AbstractBaseUser, PermissionsMixin):
