@@ -24,11 +24,22 @@ class UserManager(BaseUserManager):
 
         return user
 
+
+class SuperPower(models.Model):
+    """Superpowers to be owned by heroes"""
+    description = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.description
+
+
 class Hero(models.Model):
     """Hero model"""
     alias = models.CharField(max_length=255, unique=True)
     alter_ego = models.CharField(max_length=255, unique=True)
     universe = models.CharField(max_length=255)
+    superpowers = models.ManyToManyField(SuperPower)
+    rating = models.IntegerField(default=0)
 
     def __str__(self):
 

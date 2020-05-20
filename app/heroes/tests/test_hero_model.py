@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework import status
 from django.urls import reverse
-from heroes.serializers import HeroSerializer
+from heroes.serializers import HeroSerializer, HeroDetailSerializer
 from core import models
 
 
@@ -129,7 +129,7 @@ class AuthenticatedTests(TestCase):
         self.user.superheroes.add(hulk)
 
         res = self.client.get(marvel_hero_url(hulk.id))
-        serializer = HeroSerializer(hulk)
+        serializer = HeroDetailSerializer(hulk)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(serializer.data, res.data)
@@ -155,7 +155,7 @@ class AuthenticatedTests(TestCase):
         self.user.superheroes.add(flash)
 
         res = self.client.get(dc_hero_url(flash.id))
-        serializer = HeroSerializer(flash)
+        serializer = HeroDetailSerializer(flash)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(serializer.data, res.data)
