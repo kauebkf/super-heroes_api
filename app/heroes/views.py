@@ -12,22 +12,29 @@ class HeroViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (UpdateOwnHeroOnly,)
 
+    def get_queryset(self):
+        """returns apropriate queryset"""
+        queryset = self.queryset
+        top = bool(
+            int(self.request.query_params.get('top', 0))
+        )
+        if top:
+             queryset = queryset.filter().order_by('rating').reverse()[:1]
+
+        return queryset
+
+
     def calculate_ratings(self):
+        """Calculates ratings based on amount of users"""
         for hero in Hero.objects.all():
             hero.rating = hero.user_set.count()
             hero.save()
             hero.refresh_from_db()
 
-    def get_queryset(self):
-        """returns apropriate queryset"""
-
-
-        return self.queryset
-
     def get_serializer_class(self):
         """Returns apropriate serializer class"""
+        self.calculate_ratings()
         if self.action == 'retrieve':
-            self.calculate_ratings()
             return HeroDetailSerializer
 
         return self.serializer_class
@@ -35,6 +42,7 @@ class HeroViewSet(viewsets.ModelViewSet):
 class MarvelViewSet(HeroViewSet):
     """Viewset for Marvel heroes"""
     queryset = Hero.objects.filter(universe='Marvel')
+
 
 
 class DCViewSet(HeroViewSet):

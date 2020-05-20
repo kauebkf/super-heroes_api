@@ -159,3 +159,5 @@ class AuthenticatedTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(serializer.data, res.data)
+
+    #
