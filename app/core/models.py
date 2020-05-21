@@ -3,6 +3,11 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
                                         PermissionsMixin
 
+
+UNIVERSE_CHOICES = (
+    ('Marvel', 'Marvel'),
+    ('DC', 'DC'),
+)
 class UserManager(BaseUserManager):
 
     def create_user(self, email, password, **extra_fields):
@@ -37,7 +42,7 @@ class Hero(models.Model):
     """Hero model"""
     alias = models.CharField(max_length=255, unique=True)
     alter_ego = models.CharField(max_length=255, unique=True)
-    universe = models.CharField(max_length=255)
+    universe = models.CharField(max_length=255, choices=UNIVERSE_CHOICES)
     superpowers = models.ManyToManyField(SuperPower)
     rating = models.IntegerField(default=0)
 

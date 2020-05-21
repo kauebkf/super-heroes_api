@@ -19,7 +19,7 @@ class HeroViewSet(viewsets.ModelViewSet):
             int(self.request.query_params.get('top', 0))
         )
         if top:
-             queryset = queryset.filter().order_by('rating').reverse()[:1]
+             queryset = queryset.filter().order_by('-rating')[:1]
 
         return queryset
 

@@ -160,4 +160,20 @@ class AuthenticatedTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(serializer.data, res.data)
 
-    #
+    def test_retrieve_top_hero(self):
+        """Tests retrieving the hero with the highest rating"""
+        aquaman = {
+            'alias': 'Aquaman',
+            'alter_ego': 'Who Cares',
+            'universe': 'Marvel',
+            'rating': '5'
+        }
+
+        hero = create_sample_hero(**aquaman)
+        hero2 = create_sample_hero(alias='Thing', rating=3)
+        serializer = HeroSerializer(hero)
+        serializer2 = HeroSerializer(hero2)
+        res = self.client.get(MARVEL_URL, {'top': 1})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(serializer.data, res.data)
+        self.assertNotIn(serializer2.data, res.data)
