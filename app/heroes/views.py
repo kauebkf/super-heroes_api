@@ -19,6 +19,7 @@ class HeroViewSet(viewsets.ModelViewSet):
             int(self.request.query_params.get('top', 0))
         )
         if top:
+             self.calculate_ratings()
              queryset = queryset.filter().order_by('-rating')[:1]
 
         return queryset
@@ -33,7 +34,6 @@ class HeroViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         """Returns apropriate serializer class"""
-        self.calculate_ratings()
         if self.action == 'retrieve':
             return HeroDetailSerializer
 
